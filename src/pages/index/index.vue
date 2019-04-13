@@ -3,8 +3,10 @@
     <div class="top">图片文字转换</div>
     <div class="images">
       <block v-for="(item,index) in images" :key="index">
-        <p>{{item}}</p>
-        <image class="q-image" :src="item"  ></image>
+        <p>
+          {{result}}
+        </p>
+        <image class="q-image" :src="item"></image>
       </block>
     </div>
     <div class="bottom">
@@ -21,7 +23,8 @@
       return {
         motto: 'Hello miniprograme',
         userInfo: {},
-        images:[],
+        images: [],
+        result: ''
       }
     },
     components: {
@@ -75,23 +78,34 @@
         }
       },
       photo() {
+        mpvue.showLoading({
+          title: '加载中',
+        })
         var self = this;
         mpvue.chooseImage({
           success: function(res) {
             console.log(res);
-           self.images = res.tempFilePaths
-            // mpvue.uploadFile({
-            //   url: 'http://example.weixin.qq.com/upload', //仅为示例，非真实的接口地址
-            //   filePath: tempFilePaths[0],
-            //   name: 'file',
-            //   formData: {
-            //     'user': 'test'
-            //   },
-            //   success: function(res) {
-            //     var data = res.data
-            //     //do something
-            //   }
-            // })
+            self.images = res.tempFilePaths
+            mpvue.uploadFile({
+              url: 'http://192.168.0.127/m/tesseract_orc.php?act=ORC', //仅为示例，非真实的接口地址
+              filePath: self.images[0],
+              name: 'pic',
+              formData: {
+                'user': 'test'
+              },
+              success: function(res) {
+                mpvue.hideLoading({
+                  title: '完成',
+                });
+                console.log(JSON.parse(res.data));
+                var data = JSON.parse(res.data);
+                self.result = data.data
+                //do something
+              },
+              fail(err) {
+                console.log(err);
+              }
+            })
           }
         })
       }
@@ -119,7 +133,7 @@
     box-shadow: -1px 2px 12px #333;
   }
   /* .q-image{
-    width:100%;
-    height:100%;
-  } */
+      width:100%;
+      height:100%;
+    } */
 </style>
